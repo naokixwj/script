@@ -37,8 +37,8 @@ def GetEJL(code):
 def GetSJL(code):
     if code == None:
         return ""
-    dlCode = ["0303","0763","0001","0101","0103","0201","0202","0203","0204","0301","0302","0305","0307","0307A","0307B","0401","0402","0402A","0402B","0501","0502","0503","0504","0505","0505A","0506","0601","0602","0610","0710","0711","0712","0713","0714","0719","0720","0721","0722","0729","0750","0760","0770","0790","0810","0821","0831","0832","0833","0890","1101","1102","1103","1104","1107","1201","1202","1203"]
-    dlText = ["红树林","盐田","其他湿地","水田","旱地","果树","茶树","橡胶树","其他园地","乔木林地","竹林地","灌木林地","其他林地","A迹地","B绿化林木","天然草地","人工草地","A绿化草地","B其他人工草地","小区","农村居民点","厂房","别墅","设施农用地","A棚房","其他房屋","公路（含城镇村道路）","农村道路","铁路（含轨道交通）","硬化地表","广场","露天体育场","露天停车场","停机坪与跑道","其他硬化地表","水工设施","堤坝","码头","其它水工构筑物","温室大棚","固化池","工业设施","其他构筑物","采矿用地","尾矿库","拆迁待建工地","房屋建筑工地","道路建筑工地","其他推填（堆）土","河流水面","湖泊水面","水库水面","坑塘水面","沟渠","围海项目","填海项目","填湖项目"]
+    dlCode = ['0101','0103','0201','0202','0203','0204','0301','0302','0305','0307','0307A','0307B','0401','0402','0402A','0402B','0601','0602','0610','0710','0711','0712','0713','0714','0719','0717','0720','0721','0722','0729','0750','0760','0770','0790','0810','0821','0831','0832','0833','0839','0890','1101','1102','1103','1104','1107','1201','1202','1203']
+    dlText = ['水田','旱地','果树','茶树','橡胶树','其他园地','乔木林地','竹林地','灌木林地','其他林地','迹地','绿化林木','天然草地','人工草地','绿化草地','其他人工草地','公路（含城镇道路）','农村道路','铁路（含轨道交通）','硬化地表','广场','露天体育场','露天停车场','停机坪与跑道','其他硬化地表','露天堆放场','水工设施','堤坝','码头','其它水工构筑物','温室大棚','固化池','工业设施','其他构筑物','采矿用地','尾矿库','拆迁待建工地','房屋建筑工地','道路建筑工地','其他拆建地表','其他推填（堆）土','河流水面','湖泊水面','水库水面','坑塘水面','沟渠','围海项目','填海项目','填湖项目']
     subCode = str(code)
     subText = ""
     if subCode in dlCode:
@@ -59,12 +59,63 @@ def GetJCBH(xzqdm,monthText,fid):
         return "Err!"
 
 #some useful args
-outputFields = ["XZQDM,text,6","XMC,text,30","JCBH,text,18","TBLB,text,10","TBLBMC,text,30","TBLX,text,10","TBLXMC,text,30","TZ,text,10",
-                "QSX,text,20","HSX,text,20","DQJH,text,100","QQJH,text,100","LZB,double,18,6","BZB,double,18,6","JCMJ,double,17,1","JCLB,text,6","ZDBH,text,30",
-                "ZDLX,text,10","QQTBLX,text,10","SFWBHTB,text,2","BZ,text,100","SubArea,double,10,6","PORTION,double,10,6"]
-updateFields = ["XZQDM","XZQMC","XMC","JCBH","TBLB","TBLBMC","TBLX","TBLXMC","TZ","QSX","HSX","DQJH",
-                "QQJH","LZB","BZB","JCMJ","JCLB","ZDBH","ZDLX","QQTBLX","SFWBHTB","BZ",
-                "scenetime","SX","JH","name","FID_bhtb4490","SubArea","PORTION","BIGAREA"]
+outputFields = ["XZQDM,text,6",
+                "XMC,text,30",
+                "JCBH,text,18",
+                "TBLB,text,10",
+                "TBLBMC,text,30",
+                "TBLX,text,10",
+                "TBLXMC,text,30",
+                "TZ,text,10",
+                "QSX,text,20",
+                "HSX,text,20",
+                "DQJH,text,254",
+                "QQJH,text,254",
+                "LZB,double,18,6",
+                "BZB,double,18,6",
+                "JCMJ,double,17,1",
+                "JCLB,text,6",
+                "ZDBH,text,30",
+                "ZDHQLX,text,10",
+                "ZDQQLX,text,10",
+                "QQTBLX,text,254",
+                "SFWBHTB,text,2",
+                "BZ,text,100",
+                "YXSJLY,text,254",
+                "SubArea,double,10,6",
+                "PORTION,double,10,6"
+                ]
+updateFields = ["XZQDM",
+                "XZQMC",
+                "XMC",
+                "JCBH",
+                "TBLB",
+                "TBLBMC",
+                "TBLX",
+                "TBLXMC",
+                "TZ",
+                "QSX",
+                "HSX",
+                "DQJH",
+                "QQJH",
+                "LZB",
+                "BZB",
+                "JCMJ",
+                "JCLB",
+                "ZDBH",
+                "ZDLX",
+                "QQTBLX",
+                "SFWBHTB",
+                "BZ",
+                "scenetime",
+                "SX",
+                "JH",
+                "name",
+                "FID_bhtb4490",
+                "SubArea",
+                "PORTION",
+                "BIGAREA"
+                ]
 arcpy.AddMessage("2022 技术室")
 arcpy.AddMessage(bhtb)
 arcpy.AddMessage(qsx)
@@ -81,13 +132,9 @@ arcpy.Sort_management(bhtb, out_sorted, [["Shape", "ASCENDING"]], "UL")
 out_dataset = os.path.join(arcpy.env.workspace,"tmpbhtb4490")
 if arcpy.Describe(out_sorted).spatialReference.factoryCode != 4490:
     arcpy.Project_management (out_sorted, out_dataset, fc4490)
-    #arcpy.AddField_management(out_dataset,"BIGAREA","DOUBLE")
-    #arcpy.CalculateField_management(out_dataset, "BIGAREA",'!shape.area@squaremeters!', "PYTHON_9.3")
     rpfc.append(out_dataset)
 else:
     arcpy.FeatureClassToFeatureClass_conversion(bhtb,arcpy.env.workspace,"tmpbhtb4490")
-    #arcpy.AddField_management(out_dataset,"BIGAREA","DOUBLE")
-    #arcpy.CalculateField_management(out_dataset, "BIGAREA",'!shape.area@squaremeters!', "PYTHON_9.3")
     rpfc.append(out_dataset)
 #------------qsx
 out_dataset = os.path.join(arcpy.env.workspace,"qsx4490")
@@ -106,22 +153,18 @@ else:
     arcpy.FeatureClassToFeatureClass_conversion(hsx,arcpy.env.workspace,"hsx4490")
     rpfc.append(out_dataset)
 #------------xzjx
-out_dataset = os.path.join(arcpy.env.workspace,"xzjx4490")
-if arcpy.Describe(xzjx).spatialReference.factoryCode != 4490:
-    arcpy.Project_management (xzjx, out_dataset, fc4490)
-    rpfc.append(out_dataset)
-else:
-    arcpy.FeatureClassToFeatureClass_conversion(xzjx,arcpy.env.workspace,"xzjx4490")
-    rpfc.append(out_dataset)
-for value in rpfc:
-    arcpy.AddMessage(value)
-#------------clip bhtb
-former_rpfc0 = rpfc[0]
-clippedByXZQ = os.path.join(arcpy.env.workspace,"bhtb4490")
-arcpy.Identity_analysis(rpfc[0], rpfc[3], clippedByXZQ,"ONLY_FID")
-arcpy.AddField_management(clippedByXZQ,"BIGAREA","DOUBLE")
-arcpy.CalculateField_management(clippedByXZQ, "BIGAREA",'!shape.area@squaremeters!', "PYTHON_9.3")
-rpfc[0] = clippedByXZQ
+# out_dataset = os.path.join(arcpy.env.workspace,"xzjx4490")
+# if arcpy.Describe(xzjx).spatialReference.factoryCode != 4490:
+#     arcpy.Project_management (xzjx, out_dataset, fc4490)
+#     rpfc.append(out_dataset)
+# else:
+#     arcpy.FeatureClassToFeatureClass_conversion(xzjx,arcpy.env.workspace,"xzjx4490")
+#     rpfc.append(out_dataset)
+# for value in rpfc:
+#     arcpy.AddMessage(value)
+#------------add area field
+arcpy.AddField_management(rpfc[0],"BIGAREA","DOUBLE")
+arcpy.CalculateField_management(rpfc[0], "BIGAREA",'!shape.area@squaremeters!', "PYTHON_9.3")
 #identity bhtb4490 with qsx,hsx,xzjx
 identity1 = os.path.join(arcpy.env.workspace,"bhtb_qsx")
 identity2 = os.path.join(arcpy.env.workspace,"bhtb_qsx_hsx")
@@ -139,17 +182,6 @@ for field in outputFields:
             arcpy.AddField_management(identity3,lstItem[0].upper(),lstItem[1],int(lstItem[2]),field_length=int(lstItem[3]))
 lstFields = arcpy.ListFields(identity3)
 validFields = []
-for _field in lstFields:
-    if _field.name.startswith("XZQDM"):
-        validFields.append(_field.name)
-    if _field.name.startswith("XZQMC"):
-        validFields.append(_field.name)
-if "XZQMC_1" in validFields:
-    arcpy.CalculateField_management(identity3, "XMC","!XZQMC_1!","PYTHON_9.3")
-else:
-    arcpy.CalculateField_management(identity3, "XMC","!XZQMC!","PYTHON_9.3")
-if "XZQDM_1" in validFields:
-    arcpy.CalculateField_management(identity3, "XZQDM","!XZQDM_1!","PYTHON_9.3")
         
         
 #dissolove
@@ -164,8 +196,8 @@ arcpy.DeleteIdentical_management (sortedData, ["FID_bhtb4490"])
 arcpy.CalculateField_management(sortedData, "TBLBMC",'GetEJL(!TBLX!)', "PYTHON_9.3",'''def GetEJL(code):
     if code == None:
         return ""
-    dlCode = ["00","01","02","03","04","05","06","07","08","09","10","11","12"]
-    dlText = ["湿地","耕地","园地","林地","草地","房屋建筑","铁路与道路","构筑物","推填（堆）土","高尔夫球场","光伏板","水域","围填海（湖）"]
+    dlCode = ["01","02","03","04","05","06","07","08","09","10","11","12"]
+    dlText = ["耕地","园地","林地","草地","房屋建筑","铁路与道路","构筑物","推填（堆）土","高尔夫球场","光伏板","水域","围填海（湖）"]
     subCode = str(code)[:2]
     subText = ""
     if subCode in dlCode:
@@ -175,8 +207,8 @@ arcpy.CalculateField_management(sortedData, "TBLBMC",'GetEJL(!TBLX!)', "PYTHON_9
 arcpy.CalculateField_management(sortedData, "TBLXMC",'GetSJL(!TBLX!)', "PYTHON_9.3",'''def GetSJL(code):
     if code == None:
         return ""
-    dlCode = ['0303', '0763', '0001', '0101', '0103', '0201', '0202', '0203', '0204', '0301', '0302', '0305', '0307', '0307A', '0307B', '0401', '0402', '0402A', '0402B', '0501', '0502', '0503', '0504', '0505', '0505A', '0506', '0601', '0602', '0610', '0710', '0711', '0712', '0713', '0714', '0719', '0717', '0718', '0720', '0721', '0722', '0729', '0750', '0760', '0770', '0790', '0810', '0821', '0831', '0832', '0833', '0839', '0849', '0890', '1101', '1102', '1103', '1104', '1107', '1201', '1202', '1203']
-    dlText = ["红树林","盐田","其他湿地","水田","旱地","果树","茶树","橡胶树","其他园地","乔木林地","竹林地","灌木林地","其他林地","迹地","绿化林木","天然草地","人工草地","绿化草地","其他人工草地","小区","农村居民点","厂房","别墅","设施农用地","棚房","其他房屋","公路（含城镇道路）","农村道路","铁路（含轨道交通）","硬化地表","广场","露天体育场","露天停车场","停机坪与跑道","其他硬化地表","露天堆放场","碾压踩踏地表","水工设施","堤坝","码头","其它水工构筑物","温室大棚","固化池","工业设施","其他构筑物","采矿用地","尾矿库","拆迁待建工地","房屋建筑工地","道路建筑工地","其他拆建地表","其他整理地表","其他推填（堆）土","河流水面","湖泊水面","水库水面","坑塘水面","沟渠","围海项目","填海项目","填湖项目"]
+    dlCode = ['0101','0103','0201','0202','0203','0204','0301','0302','0305','0307','0307A','0307B','0401','0402','0402A','0402B','0601','0602','0610','0710','0711','0712','0713','0714','0719','0717','0720','0721','0722','0729','0750','0760','0770','0790','0810','0821','0831','0832','0833','0839','0890','1101','1102','1103','1104','1107','1201','1202','1203']
+    dlText = ['水田','旱地','果树','茶树','橡胶树','其他园地','乔木林地','竹林地','灌木林地','其他林地','迹地','绿化林木','天然草地','人工草地','绿化草地','其他人工草地','公路（含城镇道路）','农村道路','铁路（含轨道交通）','硬化地表','广场','露天体育场','露天停车场','停机坪与跑道','其他硬化地表','露天堆放场','水工设施','堤坝','码头','其它水工构筑物','温室大棚','固化池','工业设施','其他构筑物','采矿用地','尾矿库','拆迁待建工地','房屋建筑工地','道路建筑工地','其他拆建地表','其他推填（堆）土','河流水面','湖泊水面','水库水面','坑塘水面','沟渠','围海项目','填海项目','填湖项目']
     subCode = str(code)
     subText = ""
     if subCode in dlCode:
