@@ -110,7 +110,10 @@ def Step2Func(_inputFeature1,_inputFeature2,_outputFeature,daySpan):
     intersectOutput = os.path.join(arcpy.env.workspace,"iOutput")
     mergeOutput = os.path.join(arcpy.env.workspace,"mergeOutput")
     eraseOutput = os.path.join(arcpy.env.workspace,"eraseOutput")
-    arcpy.FeatureClassToFeatureClass_conversion(_inputFeature1,arcpy.env.workspace,"inShape1")
+    selectNotDEL = os.path.join(arcpy.env.workspace,"selectNotDEL")
+    mergeOutput2 = os.path.join(arcpy.env.workspace,"mergeOutput2")
+    #arcpy.FeatureClassToFeatureClass_conversion(_inputFeature1,arcpy.env.workspace,"inShape1")
+    arcpy.Clip_analysis(_inputFeature1,_inputFeature2,inShapePath1)
     arcpy.FeatureClassToFeatureClass_conversion(_inputFeature2,arcpy.env.workspace,"inShape2")
     arcpy.Intersect_analysis([inShapePath2,inShapePath1],intersectOutput)
     arcpy.AddField_management(intersectOutput,"PBZ","TEXT",field_length=254)
@@ -118,13 +121,21 @@ def Step2Func(_inputFeature1,_inputFeature2,_outputFeature,daySpan):
         for row in cursor:
             date1 = datetime.strptime(row[1],'%Y-%m-%d')
             date2 = datetime.strptime(row[2],'%Y-%m-%d')
-            if abs((date1 - date2).days) > daySpan and date1 > date2:
-                row[0] = ">30"
+            if abs((date1 - date2).days) > daySpan:
+                if date1 > date2:
+                    row[0] = ">30"
+                else:
+                    row[0] = "DEL"
                 cursor.updateRow(row)
-            elif abs((date1 - date2).days) <= daySpan and date1 > date2:
-                row[0] = "<=30"
+            elif abs((date1 - date2).days) <= daySpan:
+                if date1 > date2:
+                    row[0] = "DEL" #"<=30"
+                else:
+                    row[0] = "DEL"
                 cursor.updateRow(row)
-    #arcpy.Select_analysis(intersectOutput,selectNotDEL,' "PBZ" LIKE \'\%30\%\'')
+    arcpy.Select_analysis(intersectOutput,selectNotDEL,' "PBZ" <> \'DEL\'')
+    arcpy.Merge_management([inShapePath2,inShapePath1],mergeOutput)
+    arcpy.Erase_analysis(mergeOutput,intersectOutput,eraseOutput)
     lstField1 = GetFeatureFieldsList(inShapePath1)
     lstField1.append('PBZ')
     lstField2 = GetFeatureFieldsList(intersectOutput)
@@ -132,11 +143,17 @@ def Step2Func(_inputFeature1,_inputFeature2,_outputFeature,daySpan):
     for item in lstField2:
         if item not in lstField1:
             toDeleteFields.append(item)
-    arcpy.DeleteField_management(intersectOutput,toDeleteFields)
-    arcpy.Merge_management([inShapePath2,inShapePath1],mergeOutput)
-    arcpy.Erase_analysis(mergeOutput,intersectOutput,eraseOutput)
-    arcpy.Merge_management([eraseOutput,intersectOutput],_outputFeature)
+    arcpy.DeleteField_management(selectNotDEL,toDeleteFields)
+    arcpy.Merge_management([eraseOutput,selectNotDEL],_outputFeature)
+    # dissolve_fields = []
+    # oid = arcpy.Describe(mergeOutput2).OIDFieldName
+    # tmpFields = arcpy.ListFields(mergeOutput2)
+    # for _field in tmpFields:
+    #     if _field.name not in ["Shape_Length","Shape_Area",oid,"Shape"]:
+    #         dissolve_fields.append(_field.name)
+    # arcpy.Dissolve_management(mergeOutput2,_outputFeature,dissolve_fields)
     arcpy.Delete_management(eraseOutput)
+    arcpy.Delete_management(selectNotDEL)
     arcpy.Delete_management(intersectOutput)
     arcpy.Delete_management(mergeOutput)
     arcpy.Delete_management(inShapePath2)
