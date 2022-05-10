@@ -24,8 +24,11 @@ with arcpy.da.SearchCursor(inputFeatureLayer,[inputFieldName]) as cursor:
     for row in cursor:
         try:
             itemValue = row[0]
-            if itemValue not in existingValues:
-                existingValues.append(itemValue)
+            if itemValue is None or len(itemValue.strip()) == 0:
+                itemValue = ""
+            else:
+                if itemValue not in existingValues:
+                    existingValues.append(itemValue)
         except:
             arcpy.AddWarning("Unsupported field value:")
             arcpy.AddWarning(row[0])
