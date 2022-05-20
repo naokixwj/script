@@ -6,8 +6,9 @@ import os
 bhtb = arcpy.GetParameterAsText(0)
 qsx = arcpy.GetParameterAsText(1)
 hsx = arcpy.GetParameterAsText(2)
-jclb_text = str(arcpy.GetParameterAsText(3))
-outputFC = arcpy.GetParameterAsText(4)
+xzjx = arcpy.GetParameterAsText(3)
+jclb_text = str(arcpy.GetParameterAsText(4))
+outputFC = arcpy.GetParameterAsText(5)
 manualMonth = "01"
 try:
     jclb_text = jclb_text.strip()
@@ -128,6 +129,7 @@ arcpy.AddMessage("2022 技术室")
 arcpy.AddMessage(bhtb)
 arcpy.AddMessage(qsx)
 arcpy.AddMessage(hsx)
+arcpy.AddMessage(xzjx)
 arcpy.AddMessage(manualMonth)
 arcpy.AddMessage(arcpy.env.workspace)
 #reproject to 4490
@@ -136,12 +138,12 @@ rpfc = []
 #------------bhtb
 out_sorted = os.path.join(arcpy.env.workspace,"bhtbsorted")
 arcpy.Sort_management(bhtb, out_sorted, [["Shape", "ASCENDING"]], "UL")
-out_dataset = os.path.join(arcpy.env.workspace,"bhtb4490")
+out_dataset = os.path.join(arcpy.env.workspace,"tmpbhtb4490")
 if arcpy.Describe(out_sorted).spatialReference.factoryCode != 4490:
     arcpy.Project_management (out_sorted, out_dataset, fc4490)
     rpfc.append(out_dataset)
 else:
-    arcpy.FeatureClassToFeatureClass_conversion(bhtb,arcpy.env.workspace,"bhtb4490")
+    arcpy.FeatureClassToFeatureClass_conversion(bhtb,arcpy.env.workspace,"tmpbhtb4490")
     rpfc.append(out_dataset)
 #------------qsx
 out_dataset = os.path.join(arcpy.env.workspace,"qsx4490")
@@ -159,14 +161,30 @@ if arcpy.Describe(hsx).spatialReference.factoryCode != 4490:
 else:
     arcpy.FeatureClassToFeatureClass_conversion(hsx,arcpy.env.workspace,"hsx4490")
     rpfc.append(out_dataset)
-#---------------#
-arcpy.AddField_management(rpfc[0],"BIGAREA","DOUBLE")
-arcpy.CalculateField_management(rpfc[0], "BIGAREA",'!shape.area@squaremeters!', "PYTHON_9.3")
+#------------xzjx
+out_dataset = os.path.join(arcpy.env.workspace,"xzjx4490")
+if arcpy.Describe(xzjx).spatialReference.factoryCode != 4490:
+    arcpy.Project_management (xzjx, out_dataset, fc4490)
+    rpfc.append(out_dataset)
+else:
+    arcpy.FeatureClassToFeatureClass_conversion(xzjx,arcpy.env.workspace,"xzjx4490")
+    rpfc.append(out_dataset)
+for value in rpfc:
+    arcpy.AddMessage(value)
+#------------clip bhtb
+former_rpfc0 = rpfc[0]
+clippedByXZQ = os.path.join(arcpy.env.workspace,"bhtb4490")
+arcpy.Identity_analysis(rpfc[0], rpfc[3], clippedByXZQ,"ONLY_FID")
+arcpy.AddField_management(clippedByXZQ,"BIGAREA","DOUBLE")
+arcpy.CalculateField_management(clippedByXZQ, "BIGAREA",'!shape.area@squaremeters!', "PYTHON_9.3")
+rpfc[0] = clippedByXZQ
 #identity bhtb4490 with qsx,hsx,xzjx
 identity1 = os.path.join(arcpy.env.workspace,"bhtb_qsx")
-identity3 = os.path.join(arcpy.env.workspace,"bhtb_qsx_hsx")
+identity2 = os.path.join(arcpy.env.workspace,"bhtb_qsx_hsx")
+identity3 = os.path.join(arcpy.env.workspace,"bhtb_qsx_hsx_xzjx")
 arcpy.Identity_analysis(rpfc[0],rpfc[1],identity1)
-arcpy.Identity_analysis(identity1,rpfc[2],identity3)
+arcpy.Identity_analysis(identity1,rpfc[2],identity2)
+arcpy.Identity_analysis(identity2,rpfc[3],identity3)
 #check output field and create missing
 for field in outputFields:
     lstItem = field.split(",")
@@ -177,7 +195,17 @@ for field in outputFields:
             arcpy.AddField_management(identity3,lstItem[0].upper(),lstItem[1],int(lstItem[2]),field_length=int(lstItem[3]))
 lstFields = arcpy.ListFields(identity3)
 validFields = []
-        
+for _field in lstFields:
+    if _field.name.startswith("XZQDM"):
+        validFields.append(_field.name)
+    if _field.name.startswith("XZQMC"):
+        validFields.append(_field.name)
+if "XZQMC_1" in validFields:
+    arcpy.CalculateField_management(identity3, "XMC","!XZQMC_1!","PYTHON_9.3")
+else:
+    arcpy.CalculateField_management(identity3, "XMC","!XZQMC!","PYTHON_9.3")
+if "XZQDM_1" in validFields:
+    arcpy.CalculateField_management(identity3, "XZQDM","!XZQDM_1!","PYTHON_9.3")
         
 #dissolove
 dissolved = os.path.join(arcpy.env.workspace,"identity3_dissolved")
@@ -249,24 +277,51 @@ try:
     arcpy.CalculateField_management(sortedData, "BZB","!SHAPE.CENTROID.Y!","PYTHON_9.3")
 except:
     arcpy.AddWarning("图形有问题，LZB，BZB输出为空")
+# try:
+#     arcpy.CalculateField_management(sortedData, "JCBH",'GetJCBH(!XZQDM!,'+manualMonth+',!FID_bhtb4490!)', "PYTHON_9.3",'''def GetJCBH(xzqdm,monthText,fid):
+#     tmt = str(monthText)
+#     xmcsn = {}
+#     try:
+#         if str(xzqdm) not in xmcsn:
+#             xmcsn[str(xzqdm)] = 1
+#         else:
+#             xmcsn[str(xzqdm)] += 1
+#         _fid = xmcsn[str(xzqdm)]
+#         tFid = str(_fid)
+#         for i in range(6-len(tFid)):
+#             tFid = "0"+tFid
+#         if len(tmt) == 1:
+#             tmt = "0"+tmt
+#         return str(xzqdm)+tmt+tFid
+#     except:
+#         return "Err!"''')
+# except:
+#     arcpy.AddWarning("GetJCBH 运行出错，JCBH输出为空")
 try:
-    arcpy.CalculateField_management(sortedData, "JCBH",'GetJCBH(!XZQDM!,'+manualMonth+',!FID_bhtb4490!)', "PYTHON_9.3",'''def GetJCBH(xzqdm,monthText,fid):
-    tmt = str(monthText)
-    try:
-        tFid = str(fid)
-        for i in range(6-len(tFid)):
-            tFid = "0"+tFid
-        if len(tmt) == 1:
-            tmt = "0"+tmt
-        return tmt+tFid
-    except:
-        return "Err!"''')
-except:
-    arcpy.AddWarning("GetJCBH 运行出错，JCBH输出为空")
-try:
-    arcpy.CalculateField_management(sortedData, "JCMJ",'float("%.1f"%(!BIGAREA!/666.667))',"PYTHON_9.3")
+    arcpy.CalculateField_management(sortedData, "JCMJ",'float("%.2f"%!BIGAREA!)',"PYTHON_9.3")
 except:
     arcpy.AddWarning("BIGAREA 不存在，JCMJ输出为空")
+
+with arcpy.da.UpdateCursor(sortedData,['JCBH','XZQDM','FID_bhtb4490']) as cursor:
+    tmt = str(manualMonth)
+    xmcsn = {}
+    for row in cursor:
+        xzqdm = row[1]
+        try:
+            if str(xzqdm) not in xmcsn:
+                xmcsn[str(xzqdm)] = 1
+            else:
+                xmcsn[str(xzqdm)] += 1
+            _fid = xmcsn[str(xzqdm)]
+            tFid = str(_fid)
+            for i in range(6-len(tFid)):
+                tFid = "0"+tFid
+            if len(tmt) == 1:
+                tmt = "0"+tmt
+            row[0] = str(xzqdm)+tmt+tFid
+            cursor.updateRow(row)
+        except Exception as ex:
+            arcpy.AddWarning("JCBH Error: %s"%ex)
 
 keepFields = ["XZQDM",
               "XMC",
@@ -346,11 +401,14 @@ arcpy.AddMessage("2022 技术室")
 arcpy.Delete_management(out_sorted)
 arcpy.Delete_management(rpfc[1])
 arcpy.Delete_management(rpfc[2])
+arcpy.Delete_management(rpfc[3])
 arcpy.Delete_management(identity1)
+arcpy.Delete_management(identity2)
 arcpy.Delete_management(identity3)
 arcpy.Delete_management(sortedData)
 arcpy.Delete_management(dissolved)
 arcpy.Delete_management(rpfc[0])
+arcpy.Delete_management(former_rpfc0)
 
 
 
