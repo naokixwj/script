@@ -199,7 +199,7 @@ arcpy.CalculateField_management(sortedData, "TBLBMC",'GetEJL(!TBLX!)', "PYTHON_9
         subText = dlText[dlCode.index(subCode)]
     return subText''')
 
-arcpy.CalculateField_management(sortedData, "TBLXMC",'GetSJL(!TBLX!)', "PYTHON_9.3",'''def GetSJL(code):
+arcpy.CalculateField_management(sortedData, "TBLXMC",'GetSJL(!TBLX!,!TBLBMC!)', "PYTHON_9.3",'''def GetSJL(code,text1):
     if code == None:
         return ""
     dlCode = ['0101','0103','0201','0202','0203','0204','0301','0302','0305','0307','0307A','0307B','0401','0402','0402A','0402B','0601','0602','0610','0710','0711','0712','0713','0714','0719','0717','0720','0721','0722','0729','0750','0760','0770','0790','0810','0821','0831','0832','0833','0839','0890','1101','1102','1103','1104','1107','1201','1202','1203']
@@ -208,6 +208,9 @@ arcpy.CalculateField_management(sortedData, "TBLXMC",'GetSJL(!TBLX!)', "PYTHON_9
     subText = ""
     if subCode in dlCode:
         subText = dlText[dlCode.index(subCode)]
+    else:
+        if text1 is not None:
+            subText = text1
     return subText''')
 try:
     arcpy.CalculateField_management(sortedData, "TBLB","!TBLX![:2]","PYTHON_9.3")
