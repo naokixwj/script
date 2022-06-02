@@ -245,7 +245,7 @@ try:
 except:
     arcpy.AddWarning("TBLX 不存在，TBLB输出为空")
 try:
-    arcpy.CalculateField_management(sortedData, "QSX","!SX!","PYTHON_9.3")
+    arcpy.CalculateField_management(sortedData, "QSX","''.join(!SX!.split('-'))","PYTHON_9.3")
 except:
     arcpy.AddWarning("SX 不存在，QSX输出为空")
 try:
@@ -257,7 +257,7 @@ try:
 except:
     arcpy.AddWarning("ZDTBQSXLX 不存在，ZDQQLX输出为空")
 try:
-    arcpy.CalculateField_management(sortedData, "HSX","!scenetime!","PYTHON_9.3")
+    arcpy.CalculateField_management(sortedData, "HSX","''.join(!scenetime!.split('-'))","PYTHON_9.3")
 except:
     arcpy.AddWarning("scenetime 不存在，HSX输出为空")
 try:
